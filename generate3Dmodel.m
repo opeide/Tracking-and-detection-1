@@ -37,7 +37,7 @@ for i=2:2
    
    %pixels radius (square) to search for corner
    cropSize = 15;
-   %create SHIFT descriptors for selected corners
+   %increase corner accuracy with harris detector
    h = figure;
    for j=1:nImgPoints
        xi = int32(xf(j) + 0.5);     %rund opp
@@ -102,18 +102,34 @@ for i=2:2
   [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
    'MaxNumTrials', 10000, 'Confidence', 95, 'MaxReprojectionError', 50);
    
-    %mask chosen region
-    figure(3)
+    %extract ROI
+    figure(3);
     corners_x = cornerPos(:,1)
     corners_y = cornerPos(:,2)
-    poly_indexes = convhull(corners_x, corners_y)
-    mask = roipoly(currentImg, corners_x(poly_indexes), corners_y(poly_indexes));
+    poly_indexes = convhull(corners_x, corners_y);
+    minx = min(corners_x(poly_indexes));
+    miny = min(corners_y(poly_indexes));
+    maxx = max(corners_x(poly_indexes));
+    maxy = max(corners_y(poly_indexes));
+    rect = [minx, miny, maxx-minx, maxy-miny];
+    img_roi = imcrop(currentImg, rect);
+    imshow(img_roi);
+    hold on;
     
-    imshow(uint8(mask).*currentImg)
-   
+    %Detect features in ROI
+    num_features = 100;
+    %TODO: use the library listed in exercise
+    corners = detectHarrisFeatures(img_roi);
+    corners = corners.selectStrongest(num_features)
+    for k = 1:num_features        
+        pos = corners.Location(k, :)
+        pos(1)
+        pos(2)
+        plot(pos(1), pos(2), 'b+');
+    end
     
-   
-
+    %Map features to 3d model
+    
    
 end
 

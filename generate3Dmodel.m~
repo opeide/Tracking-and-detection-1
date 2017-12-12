@@ -102,15 +102,19 @@ for i=2:2
   [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
    'MaxNumTrials', 10000, 'Confidence', 95, 'MaxReprojectionError', 50);
    
-    %mask chosen region
+    %mask ROI
     figure(3)
     corners_x = cornerPos(:,1)
     corners_y = cornerPos(:,2)
     poly_indexes = convhull(corners_x, corners_y)
     mask = roipoly(currentImg, corners_x(poly_indexes), corners_y(poly_indexes));
-    imshow(uint8(mask).*currentImg)
+    image_roi = uint8(mask).*currentImg
+    imshow(image_roi)
    
-    
+    %Detect features in ROI
+    corners = detectHarrisFeatures(image);
+    corner = corners.selectStrongest(1);
+    localPos = corner.Location;
    
 
    
