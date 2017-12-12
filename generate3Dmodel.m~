@@ -112,9 +112,8 @@ for i=2:2
     
     %P = IntrinsicMatrix'*cat(2, (worldOrientation), -worldOrientation*worldLocation')
     
-    point_homo = cat(2, pos(2, :), 1)
-    point_homo =  point_homo + [200 150 0]
-    plot(point_homo(1), point_homo(2), 'g*');
+    point_homo = cat(2, pos(1, :), 1)
+    point_homo + [100 100 0]
     
      %ray to point in camera coords
     ray_origin_cam = 0;
@@ -127,15 +126,17 @@ for i=2:2
     points2 = vertex(face(:, 2), :)
     points3 = vertex(face(:, 3), :)
      
-    [intersect, t, u, v, xcoor] = TriangleRayIntersection(ray_origin_world, ray_direction_world, points1, points2, points3);
+    [intersect, t, u, v, xcoor] = TriangleRayIntersection(ray_origin_world, ray_direction_world, points1, points2, points3)
     
     for i = 1:length(intersect)
         if intersect(i) == 1
-            vect1 = points3(i, :) - points2(i, :);
-            vect2 = points1(i, :) - points2(i, :);
-            face_dir = cross(vect1, vect2);
+            vect1 = points1(i) - points2(i)
+            vect2 = points3(i) - points2(i)
+            face_dir = cross(vect1, vect2)
             if face_dir*ray_direction_world < 0
-                xcoor(i, :)
+                points1(i, :)
+                points2(i, :)
+                points3(i, :)
             end
         end
     end
