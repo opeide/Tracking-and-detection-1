@@ -9,7 +9,7 @@ function [vertex,face] = read_ply(filename)
 %
 %   IMPORTANT: works only for triangular meshes.
 %
-%   Copyright (c) 2003 Gabriel Peyré
+%   Copyright (c) 2003 Gabriel Peyrï¿½
 
 [d,c] = plyread(filename);
 face = [];
@@ -24,7 +24,7 @@ if (isfield(d,'face'))
     end
     for i = start:nf
         v = vi{i};
-        face(i,:) = v(1:3);
+        face(i,:) = v(1:3)+1;
     end
 end
 

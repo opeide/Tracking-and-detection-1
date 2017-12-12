@@ -100,17 +100,30 @@ for i=2:2
 
    %PnP to decide camera-world mapping
    cornerWorldPos = vertex(indecies,:);
-   cornerPos
-   cornerWorldPos
   [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
    'MaxNumTrials', 10000, 'Confidence', 99, 'MaxReprojectionError', 5)
 
-    %Map 3d model to image
+    %Map 3d model to image with the PnP result
     figure(4)
     imshow(currentImg)
     hold on
-    pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex)
-    plot(pos(:,1), pos(:,2), 'r*');
+    pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
+    plot(pos(:,1), pos(:,2), 'r+');
+    
+    %P = IntrinsicMatrix'*cat(2, (worldOrientation), -worldOrientation*worldLocation')
+    
+    point_homo = cat(2, pos(3, :), 1)
+     %ray to point in camera coords
+    ray_origin_cam = 0;
+    ray_direction_cam = inv(IntrinsicMatrix')*point_homo'
+    %convert to world coord
+    ray_origin_world = worldLocation
+    ray_direction_world = inv(worldOrientation)*ray_direction_cam
+    %proj to image again
+    [intersect, t, u, v, xcoor] = TriangleRayIntersection(ray_origin_world, ray_direction_world, [0 0 0], [1 0 0], [1 0 1])
+    if intersect == 1
+        intersect_point = ray_origin_world + ray_direction_world'*t
+    end
     
     %extract ROI
     figure(3);
@@ -138,7 +151,7 @@ for i=2:2
         plot(pos(1), pos(2), 'b+');
     end
     
-    %Map features to 3d model
+    %Map features to 3d model using ray face intersection
     
    
 end
