@@ -97,15 +97,25 @@ for i=2:2
    end
    waitfor(h);
    
+
    %PnP to decide camera-world mapping
    cornerWorldPos = vertex(indecies,:);
+   cornerPos
+   cornerWorldPos
   [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
-   'MaxNumTrials', 10000, 'Confidence', 95, 'MaxReprojectionError', 50);
-   
+   'MaxNumTrials', 10000, 'Confidence', 99, 'MaxReprojectionError', 5)
+
+    %Map 3d model to image
+    figure(4)
+    imshow(currentImg)
+    hold on
+    pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex)
+    plot(pos(:,1), pos(:,2), 'r*');
+    
     %extract ROI
     figure(3);
-    corners_x = cornerPos(:,1)
-    corners_y = cornerPos(:,2)
+    corners_x = cornerPos(:,1);
+    corners_y = cornerPos(:,2);
     poly_indexes = convhull(corners_x, corners_y);
     minx = min(corners_x(poly_indexes));
     miny = min(corners_y(poly_indexes));
@@ -120,11 +130,11 @@ for i=2:2
     num_features = 100;
     %TODO: use the library listed in exercise
     corners = detectHarrisFeatures(img_roi);
-    corners = corners.selectStrongest(num_features)
+    corners = corners.selectStrongest(num_features);
     for k = 1:num_features        
-        pos = corners.Location(k, :)
-        pos(1)
-        pos(2)
+        pos = corners.Location(k, :);
+        pos(1);
+        pos(2);
         plot(pos(1), pos(2), 'b+');
     end
     
