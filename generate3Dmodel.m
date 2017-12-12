@@ -97,17 +97,21 @@ for i=2:2
    end
    waitfor(h);
    
+   %PnP to decide camera-world mapping
    cornerWorldPos = vertex(indecies,:);
-       figure(3)
-      %mask chosen region
+  [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
+   'MaxNumTrials', 10000, 'Confidence', 95, 'MaxReprojectionError', 50);
+   
+    %mask chosen region
+    figure(3)
     corners_x = cornerPos(:,1)
     corners_y = cornerPos(:,2)
     poly_indexes = convhull(corners_x, corners_y)
     mask = roipoly(currentImg, corners_x(poly_indexes), corners_y(poly_indexes));
+    
     imshow(uint8(mask).*currentImg)
    
-   [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
-       'MaxNumTrials', 10000, 'Confidence', 95, 'MaxReprojectionError', 50);
+    
    
 
    
