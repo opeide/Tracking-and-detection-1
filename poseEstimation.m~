@@ -60,7 +60,7 @@ for i=1:nImgs
    [worldOrientation, worldLocation, inliersID] = estimateWorldCameraPose(pix_match_loc', model_match_loc', cameraParams, ...
        'MaxNumTrials', 100000, 'Confidence', 99, 'MaxReprojectionError', 2);
    
-    plot(pix_match_loc(1,inliersID), pix_match_loc(2,inliersID), 'b+');
+    plot(frame(pix_match_lok(1,:), pix_match_loc, 'b+')
    
    pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
    plot(pos(:,1), pos(:,2), 'g*');

@@ -141,7 +141,7 @@ function [model_descriptors, descriptor_locations] = generate3Dmodel()
         %Detect features in ROI
         roi_offset = [minx miny];
 
-        peak_thresh = 7;
+        peak_thresh = 5;
         img_roi = single(img_roi);
         [frame, desc] = vl_sift(img_roi, 'PeakThresh', peak_thresh);
         num_features = size(frame);
