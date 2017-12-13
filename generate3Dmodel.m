@@ -16,7 +16,7 @@ nImgs = length(trainImgs);
 
 
 %Map training images to 3d model
-for i=2:2
+for i=1:1
    currentFilename = trainImgs(i).name;
    currentImg = imread(strcat('data/images/init_texture/', currentFilename));
    currentImg = rgb2gray(currentImg);
@@ -107,7 +107,7 @@ for i=2:2
 
     P = IntrinsicMatrix'*cat(2, (worldOrientation), -worldOrientation*worldLocation');
 
-    %Map 3d model to image with the PnP result
+    %Map 3d model vertex to image with the PnP result
     figure(4)
     imshow(currentImg)
     hold on
@@ -116,10 +116,7 @@ for i=2:2
     
     
     
-    
-    
     %extract ROI
-    figure(3);
     corners_x = cornerPos(:,1);
     corners_y = cornerPos(:,2);
     poly_indexes = convhull(corners_x, corners_y);
@@ -129,23 +126,25 @@ for i=2:2
     maxy = max(corners_y(poly_indexes));
     rect = [minx, miny, maxx-minx, maxy-miny];
     img_roi = imcrop(currentImg, rect);
-    imshow(img_roi);
-    hold on;
     
+    figure(3)
+    imshow(currentImg)
+    hold on;
+
     %Detect features in ROI
-    offset = [minx miny];
-    num_features = 1;
+    roi_offset = [minx miny];
+    num_features = 50;
     %TODO: use the library listed in exercise
     features = detectHarrisFeatures(img_roi);
     features = features.selectStrongest(num_features);
-    for k = 1:num_features        
+    for k = 1:num_features   
+        pos_roi = features.Location(k, :);
+        pos = roi_offset + pos_roi;
         plot(pos(1), pos(2), 'g*');
-        pos = features.Location(k, :) + offset
         [world_coords, correct] = pix2world(pos, IntrinsicMatrix, worldOrientation, worldLocation, face, vertex);
         
         proj = P*cat(2, world_coords, 1)'
         proj = proj(1:2)/proj(3)
-        proj = proj' - offset
         plot(proj(1), proj(2), 'r+');
         
     end
