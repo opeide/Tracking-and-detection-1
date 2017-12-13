@@ -1,3 +1,5 @@
+run('~/matlab2017b/toolbox/vlfeat-0.9.20/toolbox/vl_setup');
+
 %init camera
 FX = 2960.37845;
 FY = FX;
@@ -13,6 +15,9 @@ cameraParams = cameraParameters('IntrinsicMatrix',IntrinsicMatrix);
 trainImgs = dir('data/images/init_texture/*.JPG');
 nImgs = length(trainImgs);
 
+
+model_descriptors = [];
+descriptor_locations = [];
 
 
 %Map training images to 3d model
@@ -108,12 +113,12 @@ for i=1:1
     P = IntrinsicMatrix'*cat(2, (worldOrientation), -worldOrientation*worldLocation');
 
     %Map 3d model vertex to image with the PnP result
-    figure(4)
+    h = figure;
     imshow(currentImg)
     hold on
     pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
     plot(pos(:,1), pos(:,2), 'r+');
-    
+    waitfor(h);
     
     
     %extract ROI
@@ -133,24 +138,33 @@ for i=1:1
 
     %Detect features in ROI
     roi_offset = [minx miny];
-    num_features = 50;
-    %TODO: use the library listed in exercise
-    features = detectHarrisFeatures(img_roi);
-    features = features.selectStrongest(num_features);
-    for k = 1:num_features   
-        pos_roi = features.Location(k, :);
+
+    peak_thresh = 7;
+    img_roi = single(img_roi);
+    [frame, desc] = vl_sift(img_roi, 'PeakThresh', peak_thresh);
+    num_features = size(frame);
+    num_features = num_features(2);
+    for k = 1:10
+        k
+        pos_roi = frame(1:2, k)'
         pos = roi_offset + pos_roi;
         plot(pos(1), pos(2), 'g*');
         [world_coords, correct] = pix2world(pos, IntrinsicMatrix, worldOrientation, worldLocation, face, vertex);
-        
-        proj = P*cat(2, world_coords, 1)'
-        proj = proj(1:2)/proj(3)
-        plot(proj(1), proj(2), 'r+');
+        if correct == 1
+            scale = frame(3, k)
+            thresh = frame(4, k)
+            proj = P*cat(2, world_coords, 1)';
+            proj = proj(1:2)/proj(3);
+            plot(proj(1), proj(2), 'r+');
+            
+            model_descriptors = [model_descriptors descriptor];
+            descriptor_locations = [descriptor_locations world_coords];
+        end
         
     end
     
 
-    
+
    
 end
 
