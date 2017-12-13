@@ -13,6 +13,8 @@ cameraParams = cameraParameters('IntrinsicMatrix',IntrinsicMatrix);
 trainImgs = dir('data/images/init_texture/*.JPG');
 nImgs = length(trainImgs);
 
+pix2world(1)
+
 %Map training images to 3d model
 for i=2:2
    currentFilename = trainImgs(i).name;
@@ -103,6 +105,8 @@ for i=2:2
   [worldOrientation,worldLocation] = estimateWorldCameraPose(cornerPos,cornerWorldPos,cameraParams,...
    'MaxNumTrials', 10000, 'Confidence', 99, 'MaxReprojectionError', 5)
 
+    P = IntrinsicMatrix'*cat(2, (worldOrientation), -worldOrientation*worldLocation');
+
     %Map 3d model to image with the PnP result
     figure(4)
     imshow(currentImg)
@@ -110,37 +114,7 @@ for i=2:2
     pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
     plot(pos(:,1), pos(:,2), 'r+');
     
-    %P = IntrinsicMatrix'*cat(2, (worldOrientation), -worldOrientation*worldLocation')
     
-    point_homo = cat(2, pos(1, :), 1)
-    point_homo + [100 100 0]
-    
-     %ray to point in camera coords
-    ray_origin_cam = 0;
-    ray_direction_cam = inv(IntrinsicMatrix')*point_homo';
-    %convert to world coord
-    ray_origin_world = worldLocation
-    ray_direction_world = inv(worldOrientation)*ray_direction_cam
-    %intersections with model faces. points 123 make up a triangle face
-    points1 = vertex(face(:, 1), :)
-    points2 = vertex(face(:, 2), :)
-    points3 = vertex(face(:, 3), :)
-     
-    [intersect, t, u, v, xcoor] = TriangleRayIntersection(ray_origin_world, ray_direction_world, points1, points2, points3)
-    
-    for i = 1:length(intersect)
-        if intersect(i) == 1
-            vect1 = points1(i) - points2(i)
-            vect2 = points3(i) - points2(i)
-            face_dir = cross(vect1, vect2)
-            if face_dir*ray_direction_world < 0
-                points1(i, :)
-                points2(i, :)
-                points3(i, :)
-            end
-        end
-    end
-    %intersect_point = ray_origin_world + ray_direction_world'*t
     
     
     
@@ -159,22 +133,32 @@ for i=2:2
     hold on;
     
     %Detect features in ROI
-    num_features = 100;
+    offset = [minx miny];
+    num_features = 1;
     %TODO: use the library listed in exercise
-    corners = detectHarrisFeatures(img_roi);
-    corners = corners.selectStrongest(num_features);
+    features = detectHarrisFeatures(img_roi);
+    features = features.selectStrongest(num_features);
     for k = 1:num_features        
-        pos = corners.Location(k, :);
-        pos(1);
-        pos(2);
-        plot(pos(1), pos(2), 'b+');
+        pos = features.Location(k, :) + offset;
+        plot(pos(1), pos(2), 'g*');
+        
+        [world_coords, correct] = pix2world(pos, IntrinsicMatrix, worldOrientation, worldLocation, face, vertex);
+        
+        proj = P*cat
+        
     end
     
-    %Map features to 3d model using ray face intersection
+
     
    
 end
 
+
+
+
+
+
+end
 
 
 
