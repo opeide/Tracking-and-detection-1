@@ -1,4 +1,4 @@
-
+run('~/matlab2017b/toolbox/vlfeat-0.9.20/toolbox/vl_setup');
 
 %generate model texture
 %[model_desc, model_desc_loc] = generate3Dmodel();
@@ -23,7 +23,7 @@ highestNrInliersImgID = 0;
 %filtering out the best hypothesis for each pose
 %where to ransac?
 
-for i=1:nImgs
+for i=17:nImgs
    currentFilename = detectImgs(i).name;
    currentImg = imread(strcat('data/images/detection/', currentFilename));
    currentImg = rgb2gray(currentImg);
@@ -64,16 +64,26 @@ for i=1:nImgs
    
    pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
    plot(pos(:,1), pos(:,2), 'g*');
-   waitfor(h)
-%    
-%    %plot
-%    pcshow(data.worldPoints,'VerticalAxis','Y','VerticalAxisDir','down','MarkerSize',30);
-%    hold on
-%    plotCamera('Size',10,'Orientation',worldOrientation,'Location', worldLocation);
-%    hold off
-%    
-%    if(highestNrInliers < length(inliersID))
-%        highestNrInliers = length(inliersID);
-%        higestNrInliersImgID = i;
-%    end
+
+    
+   
+   
+   %non linear minimizer of errorFunc
+   M = model_match_loc;
+   m = pix_match_loc;
+   nPoints = size(M);
+   nPoints = nPoints(2);
+    f = @(x)errorFunc(x, IntrinsicMatrix', M, m, nPoints); 
+    R0 = rotationMatrixToVector(inv(worldOrientation));
+    T0 = -worldOrientation*worldLocation';
+    x0 = [R0' T0];
+    
+    x = fminsearch(f, x0)
+    
+    R = x(:,1)
+    T = x(:,2)
+    R = rotationVectorToMatrix(R)
+    pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
+    plot(pos(:,1), pos(:,2), 'Oc');
+    waitfor(h)
 end

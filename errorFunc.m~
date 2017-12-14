@@ -1,0 +1,17 @@
+function [errorValue] = errorFunc(x, A, M, m, nPoints)
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes 
+%R as rodriguez vector convert to rot matrix
+[R, T] = x; 
+R = rotationVectorToMatrix(R);
+sumError = 0;
+for i = 1:nPoints
+    proj = A*(R*M(:, i)');
+    proj = proj(1:2)/proj(3);
+    pointError = norm(proj - m(:, i));
+    sumError = sumError + pointError;
+end
+
+errorValue = sumError;
+end
+
