@@ -84,6 +84,6 @@ for i=17:nImgs
     T = x(:,2)
     R = rotationVectorToMatrix(R)
     pos = worldToImage(cameraParams , inv(worldOrientation), -worldOrientation*worldLocation', vertex);
-    plot(pos(:,1), pos(:,2), 'Oc');
+    plot(pos(:,1), pos(:,2), 'Om');
     waitfor(h)
 end
