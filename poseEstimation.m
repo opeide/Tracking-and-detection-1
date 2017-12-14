@@ -1,6 +1,7 @@
 run('~/matlab2017b/toolbox/vlfeat-0.9.20/toolbox/vl_setup');
 
-%generate model texture
+%This function has to be run first. Commented out, snice it only needs to
+%be run once
 %[model_desc, model_desc_loc] = generate3Dmodel();
 
 [vertex, face] = read_ply('data/model/teabox.ply');
@@ -23,7 +24,7 @@ highestNrInliersImgID = 0;
 %filtering out the best hypothesis for each pose
 %where to ransac?
 
-for i=17:nImgs
+for i=1:nImgs
    currentFilename = detectImgs(i).name;
    currentImg = imread(strcat('data/images/detection/', currentFilename));
    currentImg = rgb2gray(currentImg);

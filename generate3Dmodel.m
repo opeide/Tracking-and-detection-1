@@ -135,7 +135,7 @@ function [model_descriptors, descriptor_locations] = generate3Dmodel()
         img_roi = imcrop(currentImg, rect);
 
         figure(3)
-        imshow(currentImg)
+        imshow(img_roi)
         hold on;
 
         %Detect features in ROI
@@ -148,7 +148,7 @@ function [model_descriptors, descriptor_locations] = generate3Dmodel()
         num_features = num_features(2);
         for k = 1:num_features
             pos_roi = frame(1:2, k)';
-            pos = roi_offset + pos_roi;
+            pos = pos_roi;
             plot(pos(1), pos(2), 'g*');
             [world_coords, correct] = pix2world(pos, IntrinsicMatrix, worldOrientation, worldLocation, face, vertex);
             if correct == 1
@@ -156,7 +156,7 @@ function [model_descriptors, descriptor_locations] = generate3Dmodel()
                 thresh = frame(4, k);
                 proj = P*cat(2, world_coords, 1)';
                 proj = proj(1:2)/proj(3);
-                plot(proj(1), proj(2), 'r+');
+                plot(proj(1)-roi_offet(1), proj(2)-roi_offet(2), 'r+');
                 
                 descriptor = desc(:,k);
                 model_descriptors = [model_descriptors descriptor];
